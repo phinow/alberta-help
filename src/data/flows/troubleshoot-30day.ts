@@ -1,0 +1,92 @@
+import { FlowDefinition } from '@/types/flow';
+import { URLS, PHONE_NUMBERS } from '@/lib/constants';
+
+export const troubleshoot30Day: FlowDefinition = {
+  id: 'troubleshoot-30day',
+  title: '30-Day Verification Deadline',
+  description: 'Resolve issues with the 30-day Alberta.ca account verification deadline for MyHealth Records',
+  category: 'troubleshoot',
+  icon: '📅',
+  estimatedMinutes: 4,
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      type: 'info',
+      title: 'About the 30-Day Deadline',
+      content: 'When you first sign up for MyHealth Records, you have 30 days to complete your Alberta.ca account verification (upgrading from a Basic to a Verified account). If you don\'t verify within 30 days, you\'ll lose access to your most recent health information until verification is complete.',
+      nextNodeId: 'check-status',
+    },
+    'check-status': {
+      id: 'check-status',
+      type: 'question',
+      title: 'What is your current situation?',
+      content: 'Let\'s figure out where you stand with the verification deadline.',
+      options: [
+        { label: 'I\'m still within the 30 days', nextNodeId: 'within-deadline', description: 'I signed up recently and want to verify now' },
+        { label: 'The 30 days have already passed', nextNodeId: 'deadline-passed', description: 'I missed the deadline and lost access' },
+        { label: 'I\'m not sure when I signed up', nextNodeId: 'check-date' },
+      ],
+    },
+    'within-deadline': {
+      id: 'within-deadline',
+      type: 'action',
+      title: 'Complete Verification Now',
+      content: 'Sign in to your Alberta.ca account and complete the identity verification process. You\'ll need your Alberta driver\'s licence or identification card to verify. The process involves confirming your personal information matches what\'s on file with the Alberta government.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      tip: 'Have your Alberta driver\'s licence or ID card handy before starting. The name and date of birth must match exactly.',
+      nextNodeId: 'verify-result',
+    },
+    'verify-result': {
+      id: 'verify-result',
+      type: 'question',
+      title: 'Were you able to complete verification?',
+      content: 'Did the verification process complete successfully?',
+      options: [
+        { label: 'Yes, I\'m now verified', nextNodeId: 'success' },
+        { label: 'Verification failed', nextNodeId: 'verify-failed' },
+      ],
+    },
+    'check-date': {
+      id: 'check-date',
+      type: 'action',
+      title: 'Check Your Account Status',
+      content: 'Sign in to your Alberta.ca account to check your current verification status. Your account dashboard will show whether you have a Basic or Verified account. If it still shows Basic, you should complete verification as soon as possible.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      nextNodeId: 'check-status',
+    },
+    'deadline-passed': {
+      id: 'deadline-passed',
+      type: 'info',
+      title: 'Deadline Has Passed',
+      content: 'Even though the 30-day deadline has passed, you can still complete verification to restore access to your full health records. Your older health information is still available, but recent records may be restricted until you verify.',
+      nextNodeId: 'verify-now',
+    },
+    'verify-now': {
+      id: 'verify-now',
+      type: 'action',
+      title: 'Verify Your Account Now',
+      content: 'Sign in and complete the verification process. Once verified, your access to recent health records will be restored. You\'ll need your Alberta driver\'s licence or identification card.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      tip: 'Verification can take a few minutes. After completing it, your MyHealth Records access should be restored automatically.',
+      nextNodeId: 'verify-result',
+    },
+    'verify-failed': {
+      id: 'verify-failed',
+      type: 'resolution',
+      title: 'Verification Issues',
+      content: 'If your verification is failing, ensure the name and date of birth on your Alberta.ca account exactly match your driver\'s licence or ID card. Common issues include middle names, hyphens, or accents not matching. If your ID is expired, you\'ll need to renew it first at a registry office. For further help, contact support.',
+      phoneNumber: PHONE_NUMBERS.ALBERTA_ACCOUNT,
+      externalUrl: URLS.ACCOUNT_CONTACT,
+      alertType: 'warning',
+    },
+    success: {
+      id: 'success',
+      type: 'resolution',
+      title: 'Verification Complete',
+      content: 'Your Alberta.ca account is now verified. You have full access to your MyHealth Records, including recent health information. Your verified status does not expire as long as your ID remains valid.',
+      externalUrl: URLS.MYHEALTH_RECORDS,
+      alertType: 'success',
+    },
+  },
+};

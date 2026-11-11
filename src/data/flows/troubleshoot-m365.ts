@@ -1,0 +1,116 @@
+import { FlowDefinition } from '@/types/flow';
+import { URLS, PHONE_NUMBERS } from '@/lib/constants';
+
+export const troubleshootM365: FlowDefinition = {
+  id: 'troubleshoot-m365',
+  title: 'Microsoft M365 Sign-In Error',
+  description: 'Fix sign-in issues when using a Microsoft 365 organizational account',
+  category: 'troubleshoot',
+  icon: '🪟',
+  estimatedMinutes: 3,
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      type: 'question',
+      title: 'What type of Microsoft account are you using?',
+      content: 'Microsoft sign-in issues on Alberta.ca often depend on whether you\'re using a personal or organizational (work/school) account.',
+      options: [
+        { label: 'Work or school (M365) account', nextNodeId: 'org-account' },
+        { label: 'Personal account (Outlook/Hotmail)', nextNodeId: 'personal-account' },
+        { label: 'I\'m not sure', nextNodeId: 'check-type' },
+      ],
+    },
+    'check-type': {
+      id: 'check-type',
+      type: 'info',
+      title: 'Personal vs Organizational Account',
+      content: 'A personal Microsoft account uses an @outlook.com, @hotmail.com, or @live.com email. An organizational (M365) account uses your work or school email (e.g., name@company.com) managed by your employer\'s IT department.',
+      nextNodeId: 'start',
+    },
+    'org-account': {
+      id: 'org-account',
+      type: 'info',
+      title: 'Known M365 Issue',
+      content: 'There is a known issue where some Microsoft 365 organizational accounts cannot sign in to Alberta.ca. This happens because your organization\'s IT department needs to enable a specific feature to allow external authentication.',
+      tip: 'This is not a problem with your Alberta.ca account — it\'s a configuration on your organization\'s Microsoft 365 tenant.',
+      nextNodeId: 'org-options',
+    },
+    'org-options': {
+      id: 'org-options',
+      type: 'question',
+      title: 'How would you like to proceed?',
+      content: 'You have a few options to resolve this:',
+      options: [
+        { label: 'Contact my IT department', nextNodeId: 'contact-it' },
+        { label: 'Use a personal Microsoft account instead', nextNodeId: 'use-personal' },
+        { label: 'Use username and password instead', nextNodeId: 'use-password' },
+      ],
+    },
+    'contact-it': {
+      id: 'contact-it',
+      type: 'resolution',
+      title: 'Contact Your IT Department',
+      content: 'Ask your organization\'s IT department to enable external authentication for Alberta.ca. They may need to allow the Alberta.ca application in your organization\'s Azure Active Directory settings. Once enabled, you should be able to sign in with your work Microsoft account.',
+      alertType: 'info',
+    },
+    'use-personal': {
+      id: 'use-personal',
+      type: 'action',
+      title: 'Use a Personal Microsoft Account',
+      content: 'You can link a personal Microsoft account (@outlook.com, @hotmail.com, @live.com) to your Alberta.ca account instead. Sign in to Alberta.ca and update your sign-in method.',
+      externalUrl: URLS.SIGN_IN,
+      nextNodeId: 'alt-result',
+    },
+    'use-password': {
+      id: 'use-password',
+      type: 'action',
+      title: 'Use Username and Password',
+      content: 'Instead of Microsoft sign-in, use the standard username (email) and password method. If you haven\'t set a password yet, you can do so through the password reset page.',
+      externalUrl: URLS.RESET_PASSWORD,
+      nextNodeId: 'alt-result',
+    },
+    'personal-account': {
+      id: 'personal-account',
+      type: 'info',
+      title: 'Personal Account Troubleshooting',
+      content: 'Issues with personal Microsoft accounts are less common. Try these steps:\n\n1. Make sure you\'re using the correct Microsoft account\n2. Clear your browser cookies and cache\n3. Try signing in using a private/incognito window\n4. Make sure your Microsoft account is in good standing',
+      nextNodeId: 'personal-result',
+    },
+    'personal-result': {
+      id: 'personal-result',
+      type: 'question',
+      title: 'Did that resolve the issue?',
+      content: 'Were you able to sign in with your personal Microsoft account?',
+      options: [
+        { label: 'Yes, it\'s working', nextNodeId: 'success' },
+        { label: 'Still not working', nextNodeId: 'contact-support' },
+      ],
+    },
+    'alt-result': {
+      id: 'alt-result',
+      type: 'question',
+      title: 'Were you able to sign in?',
+      content: 'Did the alternative sign-in method work?',
+      options: [
+        { label: 'Yes, signed in successfully', nextNodeId: 'success' },
+        { label: 'No, still having issues', nextNodeId: 'contact-support' },
+      ],
+    },
+    'contact-support': {
+      id: 'contact-support',
+      type: 'resolution',
+      title: 'Contact Support',
+      content: 'If you\'re still unable to sign in with any method, contact Alberta.ca Account Support for assistance.',
+      phoneNumber: PHONE_NUMBERS.ALBERTA_ACCOUNT,
+      alertType: 'warning',
+    },
+    success: {
+      id: 'success',
+      type: 'resolution',
+      title: 'Sign-In Successful',
+      content: 'You\'re now signed in to your Alberta.ca account. If you used an alternative sign-in method, you can continue using it going forward.',
+      alertType: 'success',
+    },
+  },
+};

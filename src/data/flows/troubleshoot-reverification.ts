@@ -1,0 +1,97 @@
+import { FlowDefinition } from '@/types/flow';
+import { URLS, PHONE_NUMBERS } from '@/lib/constants';
+
+export const troubleshootReverification: FlowDefinition = {
+  id: 'troubleshoot-reverification',
+  title: 'Forced Re-verification',
+  description: 'When you are unexpectedly asked to re-verify your Alberta.ca account',
+  category: 'troubleshoot',
+  icon: '🔄',
+  estimatedMinutes: 3,
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      type: 'info',
+      title: 'Why Am I Being Asked to Re-verify?',
+      content: 'You may be asked to re-verify your Alberta.ca account if your driver\'s licence or ID card has expired, your ID information has changed (name change, new card number), or there was a system update requiring re-verification.',
+      nextNodeId: 'check-cause',
+    },
+    'check-cause': {
+      id: 'check-cause',
+      type: 'question',
+      title: 'What might have changed?',
+      content: 'Think about what may have triggered the re-verification request.',
+      options: [
+        { label: 'My ID recently expired', nextNodeId: 'expired-id' },
+        { label: 'I got a new driver\'s licence or ID', nextNodeId: 'new-id' },
+        { label: 'Nothing has changed', nextNodeId: 'unexpected' },
+      ],
+    },
+    'expired-id': {
+      id: 'expired-id',
+      type: 'info',
+      title: 'Expired ID',
+      content: 'When your driver\'s licence or ID card expires, you have up to 6 months to update your information before your Verified account reverts to Basic. If your ID is expired, renew it at an Alberta Registry office first, then update your Alberta.ca account.',
+      nextNodeId: 'reverify',
+    },
+    'new-id': {
+      id: 'new-id',
+      type: 'action',
+      title: 'Update Your ID Information',
+      content: 'If you received a new driver\'s licence or ID card, sign in to your Alberta.ca account and update your ID information to match the new card.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      tip: 'Enter the new card number and any updated information exactly as it appears on your new ID.',
+      nextNodeId: 'reverify',
+    },
+    unexpected: {
+      id: 'unexpected',
+      type: 'action',
+      title: 'Try Re-verifying',
+      content: 'Sometimes re-verification is triggered by system updates. Sign in to your account and follow the verification prompts. You\'ll need your current driver\'s licence or ID card.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      nextNodeId: 'reverify-result',
+    },
+    reverify: {
+      id: 'reverify',
+      type: 'action',
+      title: 'Complete Re-verification',
+      content: 'Sign in to your Alberta.ca account and follow the verification prompts with your current, valid ID information.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      nextNodeId: 'reverify-result',
+    },
+    'reverify-result': {
+      id: 'reverify-result',
+      type: 'question',
+      title: 'Were you able to re-verify?',
+      content: 'Did the re-verification process complete successfully?',
+      options: [
+        { label: 'Yes, account is verified again', nextNodeId: 'success' },
+        { label: 'Verification failed', nextNodeId: 'failed' },
+        { label: 'I\'m waiting for a new code', nextNodeId: 'waiting' },
+      ],
+    },
+    waiting: {
+      id: 'waiting',
+      type: 'resolution',
+      title: 'Waiting for New Verification Code',
+      content: 'If you need a new verification code, it will arrive by mail within 10 business days, or instantly by text if your phone number is registered at an Alberta Registry office.',
+      alertType: 'info',
+    },
+    failed: {
+      id: 'failed',
+      type: 'resolution',
+      title: 'Re-verification Failed',
+      content: 'If re-verification failed, make sure your ID is not expired and that the information you entered matches your card exactly. If the problem persists, contact support.',
+      phoneNumber: PHONE_NUMBERS.ALBERTA_ACCOUNT,
+      alertType: 'warning',
+    },
+    success: {
+      id: 'success',
+      type: 'resolution',
+      title: 'Re-verification Complete',
+      content: 'Your account has been re-verified and you can continue accessing all Verified account services.',
+      alertType: 'success',
+    },
+  },
+};

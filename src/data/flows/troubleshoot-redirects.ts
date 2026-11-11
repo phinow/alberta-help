@@ -1,0 +1,106 @@
+import { FlowDefinition } from '@/types/flow';
+import { URLS, PHONE_NUMBERS } from '@/lib/constants';
+
+export const troubleshootRedirects: FlowDefinition = {
+  id: 'troubleshoot-redirects',
+  title: 'Login Redirect Loops',
+  description: 'Fix issues when login keeps redirecting between different sites',
+  category: 'troubleshoot',
+  icon: '🔁',
+  estimatedMinutes: 3,
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      type: 'info',
+      title: 'Login Redirect Loop',
+      content: 'A redirect loop happens when you try to sign in but keep getting bounced between alberta.ca, albertahealthservices.ca, or other related sites without ever completing login. This is usually caused by stale cookies or browser extensions interfering with authentication.',
+      nextNodeId: 'clear-cookies',
+    },
+    'clear-cookies': {
+      id: 'clear-cookies',
+      type: 'action',
+      title: 'Clear Cookies for Alberta Sites',
+      content: 'Clear all cookies specifically for alberta.ca and albertahealthservices.ca domains. In your browser settings, search for these domains in your cookie list and remove all associated cookies. This clears stale authentication data that may be causing the loop.',
+      tip: 'In Chrome: Settings > Privacy > Cookies > See all cookies. Search for "alberta" and remove all matching entries.',
+      nextNodeId: 'cookies-result',
+    },
+    'cookies-result': {
+      id: 'cookies-result',
+      type: 'question',
+      title: 'Did clearing cookies fix the issue?',
+      content: 'Try signing in again after clearing the cookies.',
+      options: [
+        { label: 'Yes, I can sign in now', nextNodeId: 'success' },
+        { label: 'No, still redirecting', nextNodeId: 'try-incognito' },
+      ],
+    },
+    'try-incognito': {
+      id: 'try-incognito',
+      type: 'action',
+      title: 'Try Incognito / Private Browsing',
+      content: 'Open an incognito or private browsing window and try signing in from there. This uses a clean session with no saved cookies or extensions.',
+      externalUrl: URLS.SIGN_IN,
+      tip: 'Chrome: Ctrl+Shift+N (Windows) or Cmd+Shift+N (Mac). Firefox: Ctrl+Shift+P or Cmd+Shift+P.',
+      nextNodeId: 'incognito-result',
+    },
+    'incognito-result': {
+      id: 'incognito-result',
+      type: 'question',
+      title: 'Did incognito mode work?',
+      content: 'Were you able to sign in using incognito or private browsing?',
+      options: [
+        { label: 'Yes, it works in incognito', nextNodeId: 'extension-issue' },
+        { label: 'No, still not working', nextNodeId: 'try-different-browser' },
+      ],
+    },
+    'extension-issue': {
+      id: 'extension-issue',
+      type: 'resolution',
+      title: 'Browser Extension Conflict',
+      content: 'Since incognito mode works, a browser extension is likely interfering with the sign-in process. Disable your extensions one by one to identify the culprit. Common offenders include ad blockers, privacy extensions, and VPN extensions. Once identified, add an exception for alberta.ca and albertahealthservices.ca domains.',
+      tip: 'Ad blockers and privacy tools like uBlock Origin, Privacy Badger, or Ghostery are the most common causes.',
+      alertType: 'success',
+    },
+    'try-different-browser': {
+      id: 'try-different-browser',
+      type: 'action',
+      title: 'Try a Different Browser',
+      content: 'Try signing in using a completely different browser (e.g., if you use Chrome, try Firefox or Edge). This helps determine if the issue is specific to your browser or a broader problem.',
+      externalUrl: URLS.SIGN_IN,
+      nextNodeId: 'browser-result',
+    },
+    'browser-result': {
+      id: 'browser-result',
+      type: 'question',
+      title: 'Did a different browser work?',
+      content: 'Were you able to sign in using a different browser?',
+      options: [
+        { label: 'Yes, the other browser works', nextNodeId: 'browser-success' },
+        { label: 'No, same issue everywhere', nextNodeId: 'contact-support' },
+      ],
+    },
+    'browser-success': {
+      id: 'browser-success',
+      type: 'resolution',
+      title: 'Browser-Specific Issue',
+      content: 'The redirect loop is specific to your original browser. Try fully clearing all browsing data (cache, cookies, and site data) for your original browser, or reset its settings to default. You can continue using the working browser in the meantime.',
+      alertType: 'success',
+    },
+    'contact-support': {
+      id: 'contact-support',
+      type: 'resolution',
+      title: 'Contact Support',
+      content: 'If the redirect loop persists across all browsers and in incognito mode, this may be a temporary server-side issue. Wait a few minutes and try again. If the problem continues, contact Alberta.ca Account Support for further assistance.',
+      phoneNumber: PHONE_NUMBERS.ALBERTA_ACCOUNT,
+      alertType: 'warning',
+    },
+    success: {
+      id: 'success',
+      type: 'resolution',
+      title: 'Redirect Loop Resolved',
+      content: 'Clearing cookies fixed the redirect loop. Stale or conflicting cookies are the most common cause of this issue. If it happens again, clearing cookies for alberta.ca and albertahealthservices.ca should resolve it.',
+      alertType: 'success',
+    },
+  },
+};

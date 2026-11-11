@@ -1,0 +1,101 @@
+import { FlowDefinition } from '@/types/flow';
+import { URLS, PHONE_NUMBERS } from '@/lib/constants';
+
+export const troubleshootVerification: FlowDefinition = {
+  id: 'troubleshoot-verification',
+  title: 'Verification Code Delays',
+  description: 'Understand and resolve delays receiving your Alberta.ca verification code',
+  category: 'troubleshoot',
+  icon: '⏳',
+  estimatedMinutes: 3,
+  startNodeId: 'start',
+  nodes: {
+    start: {
+      id: 'start',
+      type: 'info',
+      title: 'About Verification Codes',
+      content: 'After creating a verified Alberta.ca account, you\'ll receive a verification code by mail. This code is sent to the mailing address on your Alberta driver\'s licence or ID card and can take up to 10 business days to arrive.',
+      tip: 'Business days exclude weekends and statutory holidays. If you requested your code recently, it may still be on its way.',
+      nextNodeId: 'check-timeline',
+    },
+    'check-timeline': {
+      id: 'check-timeline',
+      type: 'question',
+      title: 'How long have you been waiting?',
+      content: 'When did you request your verification code?',
+      options: [
+        { label: 'Less than 10 business days ago', nextNodeId: 'still-waiting' },
+        { label: 'More than 10 business days ago', nextNodeId: 'code-late' },
+        { label: 'I need my code faster', nextNodeId: 'faster-option' },
+      ],
+    },
+    'still-waiting': {
+      id: 'still-waiting',
+      type: 'resolution',
+      title: 'Your Code May Still Be on the Way',
+      content: 'Verification codes can take up to 10 business days to arrive by mail. While you wait, you can still use your account with Basic access for services that don\'t require full verification. Check your mailbox regularly, including any community mailbox or PO box associated with your address.',
+      tip: 'Make sure the mailing address on your Alberta driver\'s licence or ID card is up to date. If it\'s wrong, your code may have been sent to the old address.',
+      alertType: 'info',
+    },
+    'code-late': {
+      id: 'code-late',
+      type: 'question',
+      title: 'Code Not Received After 10 Business Days',
+      content: 'If it\'s been more than 10 business days, there may be an issue. Let\'s check a couple of things.',
+      options: [
+        { label: 'My mailing address is correct', nextNodeId: 'request-new-code' },
+        { label: 'My address may have changed', nextNodeId: 'address-wrong' },
+      ],
+    },
+    'address-wrong': {
+      id: 'address-wrong',
+      type: 'action',
+      title: 'Update Your Address First',
+      content: 'If your mailing address has changed, you\'ll need to update it on your Alberta driver\'s licence or ID card at an Alberta Registry Agent before requesting a new verification code. Once updated, sign in to your account and request a new code.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      nextNodeId: 'request-new-code',
+    },
+    'request-new-code': {
+      id: 'request-new-code',
+      type: 'action',
+      title: 'Request a New Verification Code',
+      content: 'Sign in to your Alberta.ca account and request a new verification code. You can also get your code faster by visiting an Alberta Registry Agent in person, where you can receive a verification code by text message instead of mail.',
+      externalUrl: URLS.ACCOUNT_HOME,
+      nextNodeId: 'new-code-result',
+    },
+    'new-code-result': {
+      id: 'new-code-result',
+      type: 'question',
+      title: 'Were you able to get a new code?',
+      content: 'Did you request a new verification code or visit a Registry Agent?',
+      options: [
+        { label: 'Yes, I got my code and verified', nextNodeId: 'success' },
+        { label: 'I requested a new one by mail', nextNodeId: 'still-waiting' },
+        { label: 'I\'m having trouble', nextNodeId: 'contact-support' },
+      ],
+    },
+    'faster-option': {
+      id: 'faster-option',
+      type: 'resolution',
+      title: 'Get Your Code Faster at a Registry Agent',
+      content: 'If you don\'t want to wait for the mail, visit an Alberta Registry Agent in person. They can send your verification code by text message instead, which arrives within minutes. Bring your Alberta driver\'s licence or ID card with you.',
+      tip: 'Find your nearest Registry Agent at registries.alberta.ca.',
+      alertType: 'info',
+    },
+    'contact-support': {
+      id: 'contact-support',
+      type: 'resolution',
+      title: 'Contact Alberta.ca Account Support',
+      content: 'If you\'re still having trouble with your verification code, contact Alberta.ca Account Support for further assistance. Have your Alberta driver\'s licence or ID card number ready when you call.',
+      phoneNumber: PHONE_NUMBERS.ALBERTA_ACCOUNT,
+      alertType: 'warning',
+    },
+    success: {
+      id: 'success',
+      type: 'resolution',
+      title: 'Account Verified Successfully',
+      content: 'Your Alberta.ca account is now fully verified. You can access all services that require a verified account, including MyHealth Records and other government services.',
+      alertType: 'success',
+    },
+  },
+};
